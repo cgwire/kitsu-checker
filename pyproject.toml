@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "cgwire-checks"
+version = "0.1.0"
+description = "Script to test CGWire Docker image"
+authors = ["Nicolas Ledez <github.public@ledez.net>"]
+# readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+
+#[tool.poetry.group.dev.dependencies]
+
+[tool.poetry.group.tests.dependencies]
+pytest-cov = "^4.1.0"
+pytest = "^7.4.2"
+coveralls = "^3.3.1"
+pytest-emoji = "^0.2.0"
+pytest-md = "^0.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
