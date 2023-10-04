@@ -47,7 +47,12 @@ class CheckURL:
     def check_if_error(self, message_ok, message_ko):
         if self.request is None:
             return message_ko
-        error = self.request.json().get("error", False)
+
+        try:
+            error = self.request.json().get("error", False)
+        except requests.exceptions.JSONDecodeError:
+            return message_ko + "\n" + self.request.text
+
         if error:
             return message_ko + "\n" + self.request.text
         else:
@@ -56,7 +61,13 @@ class CheckURL:
     def check_login(self, message_ok, message_ko):
         if self.request is None:
             return message_ko
-        if self.request.json().get("login", False):
+
+        try:
+            error = self.request.json().get("login", False)
+        except requests.exceptions.JSONDecodeError:
+            return message_ko + "\n" + self.request.text
+
+        if error:
             return message_ok
         else:
             return message_ko + "\n" + self.request.text
@@ -64,7 +75,13 @@ class CheckURL:
     def check_bad_login(self, message_ok, message_ko):
         if self.request is None:
             return message_ko
-        if self.request.json().get("login", False):
+
+        try:
+            error = self.request.json().get("login", False)
+        except requests.exceptions.JSONDecodeError:
+            return message_ko + "\n" + self.request.text
+
+        if error:
             return message_ko
         else:
             return message_ok
@@ -80,7 +97,13 @@ class CheckURL:
     def check_zou_version(self, message_ok, message_ko):
         if self.request is None:
             return message_ko
-        if self.request.json().get("version") == self.zou_version:
+
+        try:
+            version = self.request.json().get("version")
+        except requests.exceptions.JSONDecodeError:
+            return message_ko + "\n" + self.request.text
+
+        if version == self.zou_version:
             return message_ok + self.zou_version
         else:
             return message_ko + "\n" + self.request.json().get("version")
@@ -101,8 +124,8 @@ if __name__ == "__main__":  # pragma: nocover
     )
     print(
         t.check_if_last_request_is_a_kitsu(
-            "✅ 01b  Check if it's realy a Kitsu",
-            "🔥 01b  Check if it's realy a Kitsu",
+            "✅ 01b  Check if it's really a Kitsu",
+            "🔥 01b  Check if it's really a Kitsu",
         )
     )
 
@@ -116,8 +139,8 @@ if __name__ == "__main__":  # pragma: nocover
     )
     print(
         t.check_if_last_request_is_a_zou(
-            "✅ 02b  Check if it's realy a Kitsu API",
-            "🔥 02b  Check if it's realy a Kitsu API",
+            "✅ 02b  Check if it's really a Kitsu API",
+            "🔥 02b  Check if it's really a Kitsu API",
         )
     )
 

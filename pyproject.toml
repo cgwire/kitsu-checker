@@ -15,9 +15,10 @@ requests = "^2.31.0"
 pytest-cov = "^4.1.0"
 pytest = "^7.4.2"
 coveralls = "^3.3.1"
-pytest-emoji = "^0.2.0"
-pytest-md = "^0.2.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "--cov=cgwire_checks --cov=test_cgwire_checks"

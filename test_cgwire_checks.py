@@ -52,6 +52,32 @@ class TestCheckURL(TestCase):
             assert self.t.status == 1
             mock_request.assert_called_once_with("http://127.0.0.1/api/ko")
 
+    def test_check_url_with_502_and_json(self):
+        def json_patch():
+            raise requests.exceptions.JSONDecodeError("JSONDecodeError", "", 0)
+
+        with patch(
+                "requests.get",
+                **{
+                    "return_value.status_code": 502,
+                    "return_value.text": "<html>502 Bad Gateway</html>",
+                    "return_value.json.side_effect": json_patch,
+                }
+        ) as mock_request:
+            self.t.check_url('/', self.msg_ok, self.msg_ko)
+            assert (
+                       self.t.check_if_error(self.msg_ok, self.msg_ko)
+                   ) == self.msg_ko + "\n<html>502 Bad Gateway</html>"
+            assert (
+                       self.t.check_login(self.msg_ok, self.msg_ko)
+                   ) == self.msg_ko + "\n<html>502 Bad Gateway</html>"
+            assert (
+                       self.t.check_bad_login(self.msg_ok, self.msg_ko)
+                   ) == self.msg_ko + "\n<html>502 Bad Gateway</html>"
+            assert (
+                       self.t.check_zou_version(self.msg_ok, self.msg_ko)
+                   ) == self.msg_ko + "\n<html>502 Bad Gateway</html>"
+
     def test_check_url_with_db_error(self):
         msg_db_ko = "{'error': True, 'login': False, 'message': \"Database doesn't seem reachable.\"}"
         with patch("requests.get") as mock_request:
@@ -75,8 +101,8 @@ class TestCheckURL(TestCase):
             assert self.t.status == 1
 
     def test_check_if_last_request_is_a_kitsu(self):
-        self.msg_ok = "✅ 01b Check if it's realy a Kitsu"
-        self.msg_ko = "🔥 01b Check if it's realy a Kitsu"
+        self.msg_ok = "✅ 01b Check if it's really a Kitsu"
+        self.msg_ko = "🔥 01b Check if it's really a Kitsu"
         with patch(
                 "requests.get",
                 **{
@@ -96,8 +122,8 @@ class TestCheckURL(TestCase):
                    ) == self.msg_ok
 
     def test_check_if_last_request_is_a_kitsu_ko(self):
-        self.msg_ok = "✅ 01b Check if it's realy a Kitsu"
-        self.msg_ko = "🔥 01b Check if it's realy a Kitsu"
+        self.msg_ok = "✅ 01b Check if it's really a Kitsu"
+        self.msg_ko = "🔥 01b Check if it's really a Kitsu"
         with patch(
                 "requests.get",
                 **{
@@ -117,8 +143,8 @@ class TestCheckURL(TestCase):
                    ) == self.msg_ko
 
     def test_check_if_last_request_is_a_zou(self):
-        self.msg_ok = "✅ 02b Check if it's realy a Zou"
-        self.msg_ko = "🔥 02b Check if it's realy a Zou"
+        self.msg_ok = "✅ 02b Check if it's really a Zou"
+        self.msg_ko = "🔥 02b Check if it's really a Zou"
         msg_api_ok = '{"api": "Zou", "version": "X.XX.XX"}'
 
         def json_patch():
@@ -141,8 +167,8 @@ class TestCheckURL(TestCase):
                    ) == self.msg_ok
 
     def test_check_if_last_request_is_a_zou_ko(self):
-        self.msg_ok = "✅ 02b Check if it's realy a Zou"
-        self.msg_ko = "🔥 02b Check if it's realy a Zou"
+        self.msg_ok = "✅ 02b Check if it's really a Zou"
+        self.msg_ko = "🔥 02b Check if it's really a Zou"
         msg_api_ko = '{"api": "NotMine", "version": "X.XX.XX"}'
 
         def json_patch():
@@ -303,8 +329,8 @@ class TestCheckURL(TestCase):
 
     def test_check_if_last_request_without_request(self):
         # Kitsu
-        self.msg_ok = "✅ 01b Check if it's realy a Kitsu"
-        self.msg_ko = "🔥 01b Check if it's realy a Kitsu"
+        self.msg_ok = "✅ 01b Check if it's really a Kitsu"
+        self.msg_ko = "🔥 01b Check if it's really a Kitsu"
         assert (
                    self.t.check_if_last_request_is_a_kitsu(
                        self.msg_ok,
@@ -313,8 +339,8 @@ class TestCheckURL(TestCase):
                ) == self.msg_ko
 
         # Zou
-        self.msg_ok = "✅ 02b Check if it's realy a Zou"
-        self.msg_ko = "🔥 02b Check if it's realy a Zou"
+        self.msg_ok = "✅ 02b Check if it's really a Zou"
+        self.msg_ko = "🔥 02b Check if it's really a Zou"
 
         assert (
                    self.t.check_if_last_request_is_a_zou(
