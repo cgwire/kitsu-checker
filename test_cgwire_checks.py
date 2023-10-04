@@ -20,7 +20,7 @@ class TestCheckURL(TestCase):
     def test_init(self):
         assert self.t.base_url == "http://127.0.0.1"
         assert self.t.status == 0
-        assert self.t.request == None
+        assert self.t.request is None
 
         t = CheckURL("http://127.0.0.1:8080")
         assert t.base_url == "http://127.0.0.1:8080"
@@ -63,7 +63,7 @@ class TestCheckURL(TestCase):
                     "return_value.text": "<html>502 Bad Gateway</html>",
                     "return_value.json.side_effect": json_patch,
                 }
-        ) as mock_request:
+        ):
             self.t.check_url('/', self.msg_ok, self.msg_ko)
             assert (
                        self.t.check_if_error(self.msg_ok, self.msg_ko)
@@ -157,7 +157,7 @@ class TestCheckURL(TestCase):
                     "return_value.text": msg_api_ok,
                     "return_value.json.side_effect": json_patch,
                 }
-        ) as mock_request:
+        ):
             self.t.check_url("/api", self.msg_ok, self.msg_ko)
             assert (
                        self.t.check_if_last_request_is_a_zou(
@@ -181,7 +181,7 @@ class TestCheckURL(TestCase):
                     "return_value.text": msg_api_ko,
                     "return_value.json.side_effect": json_patch,
                 }
-        ) as mock_request:
+        ):
             self.t.check_url("/api", self.msg_ok, self.msg_ko)
             assert (
                        self.t.check_if_last_request_is_a_zou(
@@ -455,7 +455,7 @@ class TestCheckURL(TestCase):
                     "return_value.text": msg_api_ok,
                     "return_value.json.side_effect": json_patch,
                 }
-        ) as mock_request:
+        ):
             self.t.check_url("/.version.txt", self.msg_ok, self.msg_ko)
         self.t.zou_version = "0.17.30"
         self.msg_ok = "✅ 06a Kitsu version 0.17.30 == "
@@ -480,7 +480,7 @@ class TestCheckURL(TestCase):
                     "return_value.text": msg_api_ok,
                     "return_value.json.side_effect": json_patch,
                 }
-        ) as mock_request:
+        ):
             self.t.check_url("/.version.txt", self.msg_ok, self.msg_ko)
         self.t.zou_version = "0.17.30"
         self.msg_ok = "✅ 06a Kitsu version 0.17.30 == "
