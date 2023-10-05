@@ -114,6 +114,9 @@ if __name__ == "__main__":  # pragma: nocover
     t = CheckURL(os.getenv("KITSU_URL", "http://127.0.0.1"))
     t.kitsu_version = os.getenv("KITSU_VERSION", None)
     t.zou_version = os.getenv("ZOU_VERSION", None)
+    print(f"Kitsu URL: {t.base_url}")
+    print(f"Kitsu version: {t.kitsu_version}")
+    print(f"Zou version: {t.zou_version}")
     # Check Kitsu
     print(
         t.check_url(
