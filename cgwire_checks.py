@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+import time
 
 import requests
 
@@ -12,13 +13,14 @@ class CheckURL:
         self.request = None
         self.kitsu_version = None
         self.zou_version = None
+        self.timeout = 5
 
     def check_url(self, url, message_ok, message_ko, data=None, error_code=200):
         try:
             if data:
-                self.request = requests.post(f"{self.base_url}{url}", json=data)
+                self.request = requests.post(f"{self.base_url}{url}", json=data, timeout=self.timeout)
             else:
-                self.request = requests.get(f"{self.base_url}{url}")
+                self.request = requests.get(f"{self.base_url}{url}", timeout=self.timeout)
 
             if self.request.status_code == error_code:
                 return message_ok
@@ -108,12 +110,35 @@ class CheckURL:
         else:
             return message_ko + "\n" + self.request.json().get("version")
 
+    def wait(self, url):
+        status = 0
+        while status != 1:
+            try:
+                r = requests.get(f"{self.base_url}{url}", timeout=self.timeout)
+                print('.', end='', flush=True)
+                if r.status_code == 200:
+                    status = 1
+                    print("")
+                    return True
+            except requests.exceptions.ConnectionError:
+                    print('.', end='', flush=True)
+                    status = 0
+            except requests.exceptions.ReadTimeout:
+                print('.', end='', flush=True)
+                status = 0
+            time.sleep(1)
 
 if __name__ == "__main__":  # pragma: nocover
     print(80 * "#")
     t = CheckURL(os.getenv("KITSU_URL", "http://127.0.0.1"))
     t.kitsu_version = os.getenv("KITSU_VERSION", None)
     t.zou_version = os.getenv("ZOU_VERSION", None)
+    timeout = os.getenv("TIMEOUT", None)
+    if timeout:
+        t.timeout = int(timeout)
+    wait = os.getenv("WAIT", None)
+    if wait:
+        t.wait("/api")
     print(f"Kitsu URL: {t.base_url}")
     print(f"Kitsu version: {t.kitsu_version}")
     print(f"Zou version: {t.zou_version}")
