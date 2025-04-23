@@ -1,25 +1,26 @@
-[tool.poetry]
+[project]
 name = "cgwire-checks"
-version = "0.1.0"
+version = "0.2.0"
 description = "Script to test CGWire Docker image"
-authors = ["Nicolas Ledez <github.public@ledez.net>"]
-# readme = "README.md"
+authors = [{ name = "Nicolas Ledez", email = "github.public@ledez.net" }]
+requires-python = "~=3.11"
+dependencies = ["requests>=2.31.0,<3"]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-requests = "^2.31.0"
+[dependency-groups]
+tests = [
+    "pytest-cov>=4.1.0,<5",
+    "pytest>=7.4.2,<8",
+    "coveralls>=3.3.1,<4",
+    "flake8>=6.1.0,<7",
+    "coverage>=6.5.0",
+]
 
-#[tool.poetry.group.dev.dependencies]
-
-[tool.poetry.group.tests.dependencies]
-pytest-cov = "^4.1.0"
-pytest = "^7.4.2"
-coveralls = "^3.3.1"
-flake8 = "^6.1.0"
+[tool.uv]
+default-groups = ["tests"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 addopts = "--cov=cgwire_checks --cov=test_cgwire_checks"
