@@ -13,7 +13,9 @@ class CheckURL:
         self.request = None
         self.kitsu_version = None
         self.zou_version = None
+        self.retry = 10
         self.timeout = 5
+        self.sleep = 1
 
     def check_url(self, url, message_ok, message_ko, data=None, error_code=200):
         try:
@@ -112,7 +114,8 @@ class CheckURL:
 
     def wait(self, url):
         status = 0
-        while status != 1:
+        retry = self.retry
+        while status != 1 and retry > 0:
             try:
                 r = requests.get(f"{self.base_url}{url}", timeout=self.timeout)
                 print('.', end='', flush=True)
@@ -121,11 +124,11 @@ class CheckURL:
                     return True
             except requests.exceptions.ConnectionError:
                     print('.', end='', flush=True)
-                    status = 0
+                    retry -= 1
             except requests.exceptions.ReadTimeout:
                 print('.', end='', flush=True)
-                status = 0
-            time.sleep(1)
+                retry -= 1
+            time.sleep(self.sleep)
         return None
 
 
@@ -135,8 +138,14 @@ if __name__ == "__main__":  # pragma: nocover
     t.kitsu_version = os.getenv("KITSU_VERSION", None)
     t.zou_version = os.getenv("ZOU_VERSION", None)
     timeout = os.getenv("TIMEOUT", None)
+    retry = os.getenv("RETRY", None)
+    sleep = os.getenv("SLEEP", None)
+    if retry:
+        t.retry = int(retry)
     if timeout:
         t.timeout = int(timeout)
+    if sleep:
+        t.sleep = int(sleep)
     wait = os.getenv("WAIT", None)
     if wait:
         t.wait("/api")
