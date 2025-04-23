@@ -1,6 +1,6 @@
 import json
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, call
 
 import requests
 
@@ -483,3 +483,60 @@ class TestCheckURL(TestCase):
                        self.msg_ko,
                    )
                ) == self.msg_ko + "\n0.17.41"
+
+    def test_wait_success_first_try(self):
+        """Test wait() method when connection succeeds on first try."""
+        with patch("requests.get") as mock_request:
+            mock_request.return_value.status_code = 200
+            with patch("time.sleep") as mock_sleep:  # Mock sleep to speed up test
+                result = self.t.wait("/api")
+                assert result is True
+                mock_request.assert_called_once_with("http://127.0.0.1/api", timeout=5)
+                mock_sleep.assert_not_called()  # Sleep should not be called on first success
+
+    def test_wait_success_after_retry(self):
+        """Test wait() method when connection succeeds after a retry."""
+        # Create a mock that fails once then succeeds
+        mock_responses = [
+            requests.exceptions.ConnectionError("Connection refused"),
+            requests.exceptions.ReadTimeout("Server did not respond within the specified timeout"),
+            type('MockResponse', (), {'status_code': 200})()
+        ]
+
+        with patch("requests.get", side_effect=mock_responses) as mock_request:
+            with patch("time.sleep") as mock_sleep:
+                with patch("builtins.print") as mock_print:
+                    self.t.retry = 5
+                    result = self.t.wait("/api")
+                    assert result is True
+                    assert mock_request.call_count == 3
+                    mock_sleep.assert_has_calls([call(1), call(1)])  # Sleep should be called twice
+                    # Check that dots were printed
+                    mock_print.assert_any_call('.', end='', flush=True)
+                    mock_print.assert_any_call('.', end='', flush=True)
+                    mock_print.assert_any_call('')  # Empty line after success
+
+    def test_wait_always_fail(self):
+        """Test wait() method when connection never succeeds."""
+        # Create a mock that fails once then succeeds
+        mock_responses = [
+            requests.exceptions.ConnectionError("Connection refused"),
+            requests.exceptions.ConnectionError("Connection refused"),
+            requests.exceptions.ReadTimeout("Server did not respond within the specified timeout"),
+            requests.exceptions.ReadTimeout("Server did not respond within the specified timeout"),
+            requests.exceptions.ReadTimeout("Server did not respond within the specified timeout"),
+        ]
+
+        with patch("requests.get", side_effect=mock_responses) as mock_request:
+            with patch("time.sleep") as mock_sleep:
+                with patch("builtins.print") as mock_print:
+                    self.t.retry = 3
+                    self.t.sleep = 2
+                    result = self.t.wait("/api")
+                    assert result is None
+                    assert mock_request.call_count == 3
+                    mock_sleep.assert_has_calls([call(2), call(2), call(2)])  # Sleep should be called three times for 2 seconds
+                    # Check that dots were printed
+                    mock_print.assert_any_call('.', end='', flush=True)
+                    mock_print.assert_any_call('.', end='', flush=True)
+                    mock_print.assert_any_call('.', end='', flush=True)
