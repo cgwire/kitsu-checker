@@ -32,16 +32,6 @@ class TestCheckURL(TestCase):
             assert self.t.status == 0
             mock_request.assert_called_once_with("http://127.0.0.1/", timeout=5)
 
-    def test_check_url_without_server(self):
-        with patch("requests.get") as mock_request:
-            mock_request.return_value.status_code = 502
-            mock_request.return_value.text = "<html>502 Bad Gateway</html>"
-            assert (
-                       self.t.check_url("/api/ko", self.msg_ok, self.msg_ko)
-                   ) == self.msg_ko + "\n<html>502 Bad Gateway</html>"
-            assert self.t.status == 1
-            mock_request.assert_called_once_with("http://127.0.0.1/api/ko", timeout=5)
-
     def test_check_url_with_502(self):
         with patch("requests.get") as mock_request:
             mock_request.return_value.status_code = 502
