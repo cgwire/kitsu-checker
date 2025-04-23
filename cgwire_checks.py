@@ -117,7 +117,6 @@ class CheckURL:
                 r = requests.get(f"{self.base_url}{url}", timeout=self.timeout)
                 print('.', end='', flush=True)
                 if r.status_code == 200:
-                    status = 1
                     print("")
                     return True
             except requests.exceptions.ConnectionError:
@@ -127,6 +126,8 @@ class CheckURL:
                 print('.', end='', flush=True)
                 status = 0
             time.sleep(1)
+        return None
+
 
 if __name__ == "__main__":  # pragma: nocover
     print(80 * "#")
@@ -211,7 +212,7 @@ if __name__ == "__main__":  # pragma: nocover
         )
     )
 
-    # Check bad account
+    # Check with a bad account
     print(
         t.check_url(
             "/api/auth/login",
@@ -228,7 +229,7 @@ if __name__ == "__main__":  # pragma: nocover
         )
     )
 
-    # Check Kistu version
+    # Check Kitsu version
     print(
         t.check_url(
             "/.version.txt",
