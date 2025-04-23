@@ -20,9 +20,13 @@ class CheckURL:
     def check_url(self, url, message_ok, message_ko, data=None, error_code=200):
         try:
             if data:
-                self.request = requests.post(f"{self.base_url}{url}", json=data, timeout=self.timeout)
+                self.request = requests.post(
+                    f"{self.base_url}{url}", json=data, timeout=self.timeout
+                )
             else:
-                self.request = requests.get(f"{self.base_url}{url}", timeout=self.timeout)
+                self.request = requests.get(
+                    f"{self.base_url}{url}", timeout=self.timeout
+                )
 
             if self.request.status_code == error_code:
                 return message_ok
@@ -118,15 +122,15 @@ class CheckURL:
         while status != 1 and retry > 0:
             try:
                 r = requests.get(f"{self.base_url}{url}", timeout=self.timeout)
-                print('.', end='', flush=True)
+                print(".", end="", flush=True)
                 if r.status_code == 200:
                     print("")
                     return True
             except requests.exceptions.ConnectionError:
-                    print('.', end='', flush=True)
-                    retry -= 1
+                print(".", end="", flush=True)
+                retry -= 1
             except requests.exceptions.ReadTimeout:
-                print('.', end='', flush=True)
+                print(".", end="", flush=True)
                 retry -= 1
             time.sleep(self.sleep)
         return None
