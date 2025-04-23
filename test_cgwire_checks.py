@@ -7,7 +7,7 @@ import requests
 from cgwire_checks import CheckURL
 
 
-def connection_error(yes):
+def connection_error(yes, timeout=10):
     raise requests.exceptions.ConnectionError()
 
 
@@ -30,7 +30,7 @@ class TestCheckURL(TestCase):
             mock_request.return_value.status_code = 200
             assert (self.t.check_url("/", self.msg_ok, self.msg_ko)) == self.msg_ok
             assert self.t.status == 0
-            mock_request.assert_called_once_with("http://127.0.0.1/")
+            mock_request.assert_called_once_with("http://127.0.0.1/", timeout=5)
 
     def test_check_url_without_server(self):
         with patch("requests.get") as mock_request:
@@ -40,7 +40,7 @@ class TestCheckURL(TestCase):
                        self.t.check_url("/api/ko", self.msg_ok, self.msg_ko)
                    ) == self.msg_ko + "\n<html>502 Bad Gateway</html>"
             assert self.t.status == 1
-            mock_request.assert_called_once_with("http://127.0.0.1/api/ko")
+            mock_request.assert_called_once_with("http://127.0.0.1/api/ko", timeout=5)
 
     def test_check_url_with_502(self):
         with patch("requests.get") as mock_request:
@@ -50,7 +50,7 @@ class TestCheckURL(TestCase):
                        self.t.check_url("/api/ko", self.msg_ok, self.msg_ko)
                    ) == self.msg_ko + "\n<html>502 Bad Gateway</html>"
             assert self.t.status == 1
-            mock_request.assert_called_once_with("http://127.0.0.1/api/ko")
+            mock_request.assert_called_once_with("http://127.0.0.1/api/ko", timeout=5)
 
     def test_check_url_with_502_and_json(self):
         def json_patch():
@@ -87,13 +87,13 @@ class TestCheckURL(TestCase):
                        self.t.check_url("/api/db_ko", self.msg_ok, self.msg_ko)
                    ) == self.msg_ko + "\n" + msg_db_ko
             assert self.t.status == 1
-            mock_request.assert_called_once_with("http://127.0.0.1/api/db_ko")
+            mock_request.assert_called_once_with("http://127.0.0.1/api/db_ko", timeout=5)
 
     def test_check_url_with_http_error(self):
         with patch("requests.get", **{"side_effect": connection_error}) as mock_request:
             assert (self.t.check_url("/", self.msg_ok, self.msg_ko)) == self.msg_ko
             assert self.t.status == 1
-            mock_request.assert_called_once_with("http://127.0.0.1/")
+            mock_request.assert_called_once_with("http://127.0.0.1/", timeout=5)
 
         with patch("requests.get") as mock_request:
             mock_request.return_value.status_code = 200
@@ -218,6 +218,7 @@ class TestCheckURL(TestCase):
             mock_request.assert_called_once_with(
                 "http://127.0.0.1/api/auth/login",
                 json={"email": "toto@kitsu", "password": "pass"},
+                timeout=5,
             )
 
             # Check error status
@@ -282,6 +283,7 @@ class TestCheckURL(TestCase):
             mock_request.assert_called_once_with(
                 "http://127.0.0.1/api/auth/login",
                 json={"email": "toto@kitsu", "password": "not_the_pass"},
+                timeout=5,
             )
 
             # Same but with the wrong login expected
